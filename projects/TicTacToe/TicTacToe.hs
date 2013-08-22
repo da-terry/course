@@ -107,11 +107,14 @@ populateBoard :: [Position] -> Player -> ActiveBoard -> Int -> ActiveBoard
 populateBoard [] _ _ _ = ActiveBoard []
 populateBoard (h:t) player b@(ActiveBoard ms) i =
 	if (length ms) == i then b
- 	else populateBoard t (switch player) (ActiveBoard ((Move (switch player) h) : ms)) (i-1)
+ 	else populateBoard t (switch player) (ActiveBoard ((Move (switch player) h) : ms)) i
 
 switch :: Player -> Player
 switch X = O
 switch O = X
+
+legalMove :: [Move] -> Move
+legalMove ms = error "???" --map toPosition ms
 
 prop_toPlayer :: Move -> Bool
 prop_toPlayer m@(Move p _) = p == toPlayer m
@@ -119,11 +122,14 @@ prop_toPlayer m@(Move p _) = p == toPlayer m
 prop_toPosition :: Move -> Bool
 prop_toPosition m@(Move _ p) = p == toPosition m
 
---prop_move :: ActiveBoard -> Bool
---prop_move b = move b (Move X N) == Open
+prop_legalMove :: ActiveBoard -> Bool
+prop_legalMove b = case move b (Move X N) of
+				Open _   -> True
+				Done _   ->	True
+				Failed _ -> False  
 
 test :: IO ()
 test = do
 	quickCheck prop_toPlayer
 	quickCheck prop_toPosition
---	quickCheck prop_move
+	quickCheck prop_legalMove
